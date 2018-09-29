@@ -1,0 +1,71 @@
+/* ==============================================================================
+NAVBAR
+============================================================================== */
+
+nav {
+    background-color: #074e49;
+    color: #fff;
+}
+
+/* nav links */
+.nav-link {
+    color: white;
+}
+.nav-link:hover {
+    color: #c8dc7c;
+}
+
+/* scrape button */
+li button {
+    background-color: #19ac65;
+}
+
+/* ==============================================================================
+TITLE JUMBOTRON
+============================================================================== */
+
+.jumbotron {
+    background-color: #fff;
+}
+
+.header {
+    background-image: url(../images/sports-cover.jpg);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 100%;
+    padding: 180px;
+    color: #fff;
+}
+
+/* ==============================================================================
+ARTICLES
+============================================================================== */
+
+.panel {
+	margin: 10px 0 10px 0;
+	padding: 10px;
+	border-radius: 0;
+	box-shadow: 3px 3px 20px lightslategrey;
+}
+
+.panel-heading {
+	background-color: #e62725;
+	color: #fff;
+	padding: 5px;
+}
+
+.btn {
+	background-color: #eb8b1c;
+	color: #fff;
+}
+  
+.panel-heading .btn {
+	float: right;
+	margin-right: 5px;
+	margin-bottom: 50px;
+	margin-left: 5px;
+}
+
+/* ==============================================================================
+NOTES
+============================================================================== */
