@@ -83,9 +83,9 @@ router.post("/saved/notes/:id", function(req, res) {
         db.Article.findOneAndUpdate({_id: req.params.id}, { $push: {"note": dbNote._id} }, {new: true}, 
           function(err, data) {
             if (err) {
-              res.send(err);
+              console.log(err);
             } else {
-              console.log(data.note);
+              console.log(data);
             }
         });
       }).catch(function(err) {
@@ -98,7 +98,7 @@ router.post("/saved/notes/:id", function(req, res) {
 router.post("/saved/delete/:id", function(req, res) {
   db.Note.remove({_id: req.params.id}, function(err, data){
     if (err) {
-      res.send(err);
+      console.log(err);
     } else {
         res.redirect("/saved");
         console.log("note succesfully removed");
