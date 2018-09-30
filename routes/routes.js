@@ -3,7 +3,6 @@ const express = require('express');
 const router = express.Router();
 const request = require("request");
 const cheerio = require("cheerio");
-var methodOverride = require("method-override");
 // Models
 const db = require("../models");
 
@@ -19,103 +18,105 @@ router.get("/scrape", function(req,res){
       result.title = $(this).children().text();
       result.link = "http://www.espn.com" + $(this).children().attr("href");
 
-      db.Article.findOne({title: result.title}).then(function (dbFinder) {
-        if (dbFinder) {
-          return;
-        }
-        else {
-          db.Article.create(result)
-          .then(function(dbArticle) {
-            console.log(dbArticle);
-          })
-          .catch(function(err) {
-            return res.json(err);
-          });
-        }
-
+      db.Article.create(result)
+      .then(function(dbArticle) {
+        console.log(dbArticle);
+      })
+      .catch(function(err) {
+        return res.json(err);
       });
+        
     });
     res.redirect("/");
   });
+  alert("New articles succesfully scraped!");
 });
 
 // Home
 router.get("/", function(req, res) {
-  db.Article.find({}, function(error, data) {
-      if (error) {
-        console.log(error);
+  db.Article.find({ saved: false }, function(err, data) {
+      if (err) {
+        console.log(err);
       } else {
           res.render("index", { article: data });
       }
     });
 });
 
-// Displays articles as JSON objects
-router.get("/articles", function(req, res) {
-  db.Article.find({})
-    .then(function(dbArticle) {
-      res.json(dbArticle);
-    })
-    .catch(function(err) {
-      res.json(err);
-    });
-});
-
-// Allows for looking up specific article by id
-router.get("/articles/:id", function(req, res) {
-  db.Article.findOne({ _id: req.params.id })
-    .populate("note")
-    .then(function(dbArticle) {
-      res.json(dbArticle);
-    })
-    .catch(function(err) {
-      res.json(err);
-    });
-});
-
-// Posts notes to articles
-router.post("/articles/:id", function(req, res) {
-  db.Note.create(req.body)
-    .then(function(dbNote) {
-      return db.Article.findOneAndUpdate({ _id: req.params.id }, { note: dbNote._id }, { new: true });
-    })
-    .then(function(dbArticle) {
-      res.json(dbArticle);
-    })
-    .catch(function(err) {
-      res.json(err);
-    });
-});
-
 // Displays saved articles page
 router.get("/saved", function(req, res) {
-  db.Article.find({ saved: true }).exec(function(err, doc) {
-    if (err) {
-      res.send(err);
-    } else {
-      res.render("saved", {saved: doc});
-    }
+   db.Article.find({saved: true}).populate("note", 'body').exec(function(err, doc) {
+  if (err) {
+    res.send(err);
+  }
+  else {
+    res.render("saved", {saved: doc});
+  }
   });
 });
 
-// put route to updated the article to be saved:true
+// Put route to save article
 router.post("/saved/:id", function(req, res) {
-  db.Article.updateOne({_id: req.params.id}, {$set: {saved: true}}, function(err, doc) {
+  db.Article.findOneAndUpdate({_id: req.params.id}, {$set: {saved: true}}, function(err, data) {
     if (err) {
-      res.send(err);
+      console.log(err);
     } else {
-      res.redirect("/");
+        res.redirect("/");
     }
   });
 });
 
-// delete route for articles on the saved page
+// Deletes articles from saved
 router.post("/delete/:id", function(req, res){
-    db.Article.updateOne({_id: req.params.id}, {$set: {saved: false}}, function(err, doc) {
+    db.Article.findOneAndUpdate({_id: req.params.id}, {$set: {saved: false}}, function(err, data) {
+      if (err) {
+        console.log(err);
+      } else {
+          res.redirect("/saved");
+      }
+  });
+});
+
+      // db.Note.create(req.body)
+      // .then(function(dbNote) {
+      //   db.Article.findOneAndUpdate({_id: req.params.id}, { $push: {"notes": dbNote._id} }, {new: true}, 
+      //     function(err, data) {
+      //       if (err) {
+      //         res.send(err);
+      //       } else {
+      //         console.log(data);
+      //       }
+      //   });
+      // }).catch(function(err) {
+      //   return res.json(err);
+      // });
+
+router.post("/saved/notes/:id", function(req, res) {
+  db.Note.create(req.body)
+      .then(function(dbNote) {
+        db.Article.findOneAndUpdate({_id: req.params.id}, { $push: {"note": dbNote._id} }, {new: true}, 
+          function(err, data) {
+            if (err) {
+              res.send(err);
+            } else {
+              console.log(data.note);
+            }
+        });
+      }).catch(function(err) {
+        return res.json(err);
+      });
+  res.redirect("/saved");
+
+});
+
+// Delete route to a note
+router.post("/saved/delete/:id", function(req, res) {
+  db.Note.findOneAndRemove({_id: req.params.id}, function(err, data){
     if (err) {
-      res.send(err);
+      console.log(err);
     } else {
-      res.redirect("/saved");
+        res.redirect("/saved");
+        console.log("note succesfully removed");
     }
   });
 });
