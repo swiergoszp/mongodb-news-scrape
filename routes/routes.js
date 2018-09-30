@@ -45,13 +45,13 @@ router.get("/", function(req, res) {
 
 // Displays saved articles page
 router.get("/saved", function(req, res) {
-   db.Article.find({saved: true}).populate("note", 'body').exec(function(err, doc) {
-  if (err) {
-    res.send(err);
-  }
-  else {
-    res.render("saved", {saved: doc});
-  }
+  // join note body to articles note id prop with populate
+  db.Article.find({saved: true}).populate("note", 'body').exec(function(err, doc) {
+    if (err) {
+      res.send(err);
+    } else {
+      res.render("saved", {saved: doc});
+    }
   });
 });
 
@@ -77,20 +77,6 @@ router.post("/delete/:id", function(req, res){
   });
 });
 
-      // db.Note.create(req.body)
-      // .then(function(dbNote) {
-      //   db.Article.findOneAndUpdate({_id: req.params.id}, { $push: {"notes": dbNote._id} }, {new: true}, 
-      //     function(err, data) {
-      //       if (err) {
-      //         res.send(err);
-      //       } else {
-      //         console.log(data);
-      //       }
-      //   });
-      // }).catch(function(err) {
-      //   return res.json(err);
-      // });
-
 router.post("/saved/notes/:id", function(req, res) {
   db.Note.create(req.body)
       .then(function(dbNote) {
@@ -106,18 +92,17 @@ router.post("/saved/notes/:id", function(req, res) {
         return res.json(err);
       });
   res.redirect("/saved");
-
 });
 
 // Delete route to a note
 router.post("/saved/delete/:id", function(req, res) {
-  db.Note.findOneAndRemove({_id: req.params.id}, function(err, data){
+  db.Note.remove({_id: req.params.id}, function(err, data){
     if (err) {
-      console.log(err);
+      res.send(err);
     } else {
         res.redirect("/saved");
         console.log("note succesfully removed");
-    }
+      }
   });
 });
 
