@@ -29,7 +29,7 @@ router.get("/scrape", function(req,res){
     });
     res.redirect("/");
   });
-  alert("New articles succesfully scraped!");
+  console.log("New articles succesfully scraped!");
 });
 
 // Home
